@@ -4,30 +4,39 @@ from distutils.command.upload import upload
 from pytube import YouTube
 from urllib.parse import urlencode
 from zipfile import ZipFile
+from random import random
+from PIL import Image
 
 import asyncio
 import base64
 import json
-import numpy as np
 import os
-import pandas as pd
 import pyaudio
 import requests
-import streamlit as st
 import sys
 import time
 import websockets
+import streamlit as st
+import pandas as pd
+import numpy as np
 
+# API key
 api_key = st.secrets['api_key']
-st.title("Speakr Project")
-#Formatting
+# Print title
+st.title("Speakr")
+# Format bar
 bar = st.progress(0)
 
-#***
+# Global variables
+# ***
 global orig1, delta1
 orig1 = 0
 delta1 = 0
 
+# Print the image of the logo
+st.markdown("<p style='text-align:center;''><img src='https://media.discordapp.net/attachments/936829125891596388/937203364201132082/output-onlinepngtools.png?width=749&height=587' class='center' width='270rem' height='200rem'></p>", unsafe_allow_html=True)
+
+# Button update function
 def buttonUpdate(newData):
     global orig1, delta1
     delta1 = newData - orig1 
@@ -51,16 +60,6 @@ def buttonUpdate(newData):
     #***
     df = pd.DataFrame(np.random.rand(30, 5),columns=('col %d' % i for i in range(5)))
     st.bar_chart(df)
-
-import pyaudio
-import streamlit as st
-import websockets
-import asyncio
-import base64
-import json
-from urllib.parse import urlencode
-from configure import auth_key
-from random import random
 
 # Specify constants
 FRAMES_PER_BUFFER = 3200
