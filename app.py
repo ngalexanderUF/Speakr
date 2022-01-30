@@ -1,3 +1,4 @@
+from tracemalloc import start
 from configure import auth_key
 from datetime import datetime
 from distutils.command.upload import upload
@@ -92,12 +93,16 @@ def start_listening():
 def stop_listening():
     st.session_state['run'] = False
 
-# Create two columns for buttons, one for start and one for stop
-start, stop = st.columns(2)
+# Create four columns for buttons, one for start and one for stop, the other two are for formatting
+start, col2, col3, stop = st.columns(4)
 
-# Create the two buttons
-start.button('Begin listening...', on_click = start_listening)
-stop.button('Stop listening...', on_click = stop_listening)
+# Create button to start recording
+start.button('Start Recording', on_click = start_listening)
+
+# After you click "Start Recording"
+if st.session_state['run']:
+    # The button to finish recording pops up
+    stop.button('Finish Recording', on_click = stop_listening)
 
 # List of words to boost, plus the params necessary for the url query
 word_boost = ["like", "umm", "um", "err", "er", "uhh", "uh", "hmm", "hm", "well", "okay", "totally", "literally"]
