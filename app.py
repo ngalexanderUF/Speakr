@@ -366,16 +366,16 @@ data_button = st.button('Show Data')
 
 
 if url is not None:
-    youtube_call(url)
-    transcribe()
-
-    with open("transcription.zip", "rb") as download:
-        btn = st.download_button(
-            label="ZIP",
-            data=download,
-            file_name="transcription.zip",
-            mime="application/zip"
-        )
+    #youtube_call(url)
+    #transcribe()
+    print(":)")
+    #with open("transcription.zip", "rb") as download:
+    #    btn = st.download_button(
+    #        label="ZIP",
+    #        data=download,
+    #        file_name="transcription.zip",
+    #        mime="application/zip"
+    #    )
 
 if data_button:
     with st.spinner('Processing data...'):
