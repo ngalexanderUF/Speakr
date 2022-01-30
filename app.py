@@ -150,7 +150,6 @@ def transcribe():
     with open("transcribe.srt", "w") as _file:
         _file.write(srt_response.text)
 
-
 # Specify constants
 FRAMES_PER_BUFFER = 3200
 FORMAT = pyaudio.paInt16
@@ -176,14 +175,10 @@ if 'run' not in st.session_state:
 
 # Define function for beginning the listening process
 def start_listening():
-    with st.spinner('Recording has started.'):
-        time.sleep(1)
     st.session_state['run'] = True
 
 # Define function to stop listening
 def stop_listening():
-    with st.spinner('Stopping Recording...'):
-        time.sleep(1)
     st.session_state['run'] = False
 
 # List of words to boost, plus the params necessary for the url query
@@ -258,81 +253,6 @@ async def send_receive():
        send_result, receive_result = await asyncio.gather(send(), receive())
 
 asyncio.run(send_receive())
-FRAMES_PER_BUFFER = 3200
-FORMAT = pyaudio.paInt16
-CHANNELS = 1
-RATE = 16000
-p = pyaudio.PyAudio()
-
-# starts recording
-stream = p.open(
-format=FORMAT,
-channels=CHANNELS,
-rate=RATE,
-input=True,
-frames_per_buffer=FRAMES_PER_BUFFER
-)
-
-sample_rate = 16000
-word_boost = ["arm", "uhh"]
-params = {"sample_rate": 16000, "word_boost": json.dumps(word_boost)}
-
-url = f"wss://api.assemblyai.com/v2/realtime/ws?{urlencode(params)}"
-
-# the AssemblyAI endpoint we're going to hit
-# url = "wss://api.assemblyai.com/v2/realtime/ws?sample_rate=16000"
-
-
-async def send_receive():
-    print(f'Connecting websocket to url ${url}')
-    async with websockets.connect(
-        url,
-        extra_headers=(("Authorization", auth_key),),
-        ping_interval=5,
-        ping_timeout=20
-    ) as _ws:
-        await asyncio.sleep(0.1)
-        print("Receiving SessionBegins ...")
-        session_begins = await _ws.recv()
-        print(session_begins)
-        print("Sending messages ...")
-        async def send():
-            while True:
-                try:
-                    data = stream.read(FRAMES_PER_BUFFER)
-                    data = base64.b64encode(data).decode("utf-8")
-                    json_data = json.dumps({"audio_data":str(data)})
-                    await _ws.send(json_data)
-                except websockets.exceptions.ConnectionClosedError as e:
-                    print(e)
-                    assert e.code == 4008
-                    break
-                except Exception as e:
-                    assert False, "Not a websocket 4008 error"
-                await asyncio.sleep(0.01)
-            
-            return True
-        
-        async def receive():
-            while True:
-                try:
-                    result_str = await _ws.recv()
-                    #if json.loads(result_str)['message_type'] == 'FinalTranscript':
-                    print(json.loads(result_str)['text'])
-                    # st.markdown(json.loads(result_str)['text'])
-                except websockets.exceptions.ConnectionClosedError as e:
-                    print(e)
-                    assert e.code == 4008
-                    break
-                except Exception as e:
-                    assert False, "Not a websocket 4008 error"
-        
-        send_result, receive_result = await asyncio.gather(send(), receive())
-
-
-    asyncio.run(send_receive())
-
-
 
 #Empty container for spacing
 st.empty()
@@ -356,10 +276,10 @@ st.write("\n")
 st.warning("Option 3: Live recording")
 
 # Create two columns for buttons, one for start and one for stop
-start, stop = st.columns(2)
+start, col2, col3, stop = st.columns(4)
 # Create the two buttons
-start.button('Start recording', on_click = start_listening)
-stop.button('Stop recording', on_click = stop_listening)
+start.button('Start Recording', on_click = start_listening)
+stop.button('Finish Recording', on_click = stop_listening)
 
 st.write("\n")
 data_button = st.button('Show Data')
