@@ -27,7 +27,9 @@ How to install and run!
 ```sh
 git clone https://github.com/ngalexanderUF/Speakr.git
 ```
+
 2) Obtain your AssemblyAI API key by signing up with Assembly.AI
+
 
 3) Install necessary tools
 ```sh
