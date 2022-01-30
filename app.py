@@ -52,7 +52,7 @@ def buttonUpdate(newData):
     df = pd.DataFrame(np.random.rand(30, 5),columns=('col %d' % i for i in range(5)))
     st.bar_chart(df)
     
-    ***
+    #***
 def live_audio():
     FRAMES_PER_BUFFER = 3200
     FORMAT = pyaudio.paInt16
