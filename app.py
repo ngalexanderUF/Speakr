@@ -19,9 +19,14 @@ import time
 import websockets
 
 api_key = st.secrets['api_key']
-st.title("Speakr Project")
+
 #Formatting
+st.markdown("<h1 style='text-align: center; color: white;'>Speakr</h1>", unsafe_allow_html=True)
+
+
 bar = st.progress(0)
+st.image("output-onlinepngtools.png", width = 350)
+
 
 #***
 global orig1, delta1
