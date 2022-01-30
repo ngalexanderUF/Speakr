@@ -229,7 +229,6 @@ def buttonUpdate(data1,data2,data3,data4,data5):
 
     #Chart
     #***
-    # print (np.random.rand(30, 5))
     finalTextNum = 0
     filepath = 'transcribe.srt.txt'
     with open(filepath) as fp:
@@ -238,13 +237,9 @@ def buttonUpdate(data1,data2,data3,data4,data5):
         while line:
             if (count%4 == 0):
                 finalTextNum = line
-            # print("Line {}: {}".format(count, line.strip()))
             line = fp.readline()
             count += 1
-    # print("\nFinal text num")
-    # print(finalTextNum)
 
-    # to get the number of lines per section divide the finalTextnum by 30 (since 30 columns in the graph)
     sectionNum = int((int(finalTextNum)/30)) * 4
 
 
@@ -257,7 +252,6 @@ def buttonUpdate(data1,data2,data3,data4,data5):
         while line:
             if (count%4 == 2):
                 finalTextNum = line
-                # print("Line {}: {}".format(count, line.strip()))
                 everything.append(line)
                 
             line = fp.readline()
@@ -273,7 +267,6 @@ def buttonUpdate(data1,data2,data3,data4,data5):
         if (counter < sectionSize):
             stringer += x
         else:
-            # print (stringer)
             Dict[dictCount] = stringer
             stringer = ""
             dictCount += 1
@@ -296,7 +289,6 @@ def buttonUpdate(data1,data2,data3,data4,data5):
     df = pd.DataFrame(realDict,columns=['um', 'uh', 'like', 'hmm', 'mhm'])
     st.bar_chart(df)
     
-    #***
 def youtube_call(url):
     vid = YouTube(url)
     audio = vid.streams.get_audio_only()
@@ -310,7 +302,6 @@ def transcribe():
         for file in os.listdir(current_dir):
             if file.endswith(".mp4"):
                 mp4_file = os.path.join(current_dir, file)
-                #print(mp4_file)
         filename = mp4_file
         bar.progress(20)
 
@@ -327,15 +318,14 @@ def transcribe():
                                 data=read_file(filename))
         audio_url = response.json()['upload_url']
         
-        #st.info('3. YouTube audio file has been uploaded to AssemblyAI')
         bar.progress(30)
 
         endpoint = "https://api.assemblyai.com/v2/transcript"
 
         json = {
         "audio_url": audio_url,
-        "auto_highlights": True, #add
-        "disfluencies": True
+        "auto_highlights": True, 
+        "disfluencies": True #  ensure that word fillers are present
         }
 
         headers = {
@@ -345,25 +335,18 @@ def transcribe():
 
         transcript_input_response = requests.post(endpoint, json=json, headers=headers)
 
-        #st.info('4. Transcribing uploaded file')
         bar.progress(40)
 
-        # 5. Extract transcript ID
         transcript_id = transcript_input_response.json()["id"]
-        #st.info('5. Extract transcript ID')
         bar.progress(50)
 
-        # 6. Retrieve transcription results
+        
         endpoint = f"https://api.assemblyai.com/v2/transcript/{transcript_id}"
         headers = {
             "authorization": api_key,
         }
         transcript_output_response = requests.get(endpoint, headers=headers)
-        #st.info('6. Retrieve transcription results')
         bar.progress(60)
-
-        # Check if transcription is complete
-        
 
         while transcript_output_response.json()['status'] != 'completed':
             time.sleep(10)
@@ -372,11 +355,10 @@ def transcribe():
     st.success('Transcription complete.')
     bar.progress(100)
 
-    # 7. Print transcribed text
     st.header('Output')
     st.info(transcript_output_response.json()["text"])
 
-    # 8. Save transcribed text to file
+    # Save transcribed text to file
 
     # Save as TXT file
     transcribe_txt = open('transcribe_txt', 'w')
@@ -525,16 +507,16 @@ data_button = st.button('Show Data')
 
 
 if url is not None:
-    #youtube_call(url)
-    #transcribe()
+    youtube_call(url)
+    transcribe()
     print(":)")
-    #with open("transcription.zip", "rb") as download:
-    #    btn = st.download_button(
-    #        label="ZIP",
-    #        data=download,
-    #        file_name="transcription.zip",
-    #        mime="application/zip"
-    #    )
+    with open("transcription.zip", "rb") as download:
+        btn = st.download_button(
+            label="ZIP",
+            data=download,
+            file_name="transcription.zip",
+            mime="application/zip"
+        )
 
 if data_button:
     with st.spinner('Processing data...'):
