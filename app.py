@@ -29,32 +29,271 @@ st.markdown("<p style='text-align:center;''><img src='https://media.discordapp.n
 
 
 #***
-global orig1, delta1
+global orig1, delta1, orig2, delta2, orig3, delta3, orig4, delta4, orig5, delta5
 orig1 = 0
 delta1 = 0
+orig2 = 0
+delta2 = 0
+orig3 = 0
+delta3 = 0
+orig4 = 0
+delta4 = 0
+orig5 = 0
+delta5 = 0
 
-def buttonUpdate(newData):
+def umCounter(transc):
+    umCount = 1
+    checkNext = False
+    prevSpace = True
+
+    for c in transc: 
+        if (checkNext) and (prevSpace):
+            if (c == "m") or (c == "M"):
+                umCount += 1
+                checkNext = False
+            else:
+                checkNext = False
+        if (c == "u") or (c == "U"):
+            checkNext = True
+        elif (c == " "):
+            prevSpace = True
+            checkNext = False
+        else:
+            prevSpace = False
+            checkNext = False
+
+    return (umCount)
+
+def uhCounter(transc):
+    uhCount = 0
+    checkNext = False
+    prevSpace = True
+
+    for c in transc: 
+        if (checkNext) and (prevSpace):
+            if (c == "h") or (c == "H"):
+                uhCount += 1
+                checkNext = False
+            else:
+                checkNext = False
+        if (c == "u") or (c == "U"):
+            checkNext = True
+        elif (c == " "):
+            prevSpace = True
+            checkNext = False
+        else:
+            prevSpace = False
+            checkNext = False
+
+    return (uhCount)
+
+
+def likeCounter(transc):
+    likeCount = 0
+    word = ""
+    prevSpace = True
+    startCheck = False
+    count = 0
+
+    for c in transc: 
+        if (startCheck):
+            if (count < 3):
+                word += c
+                count += 1
+            else: 
+                if (word.lower() == "like"):
+                    likeCount += 1
+                word = ""
+                prevSpace = False
+                startCheck = False
+                count = 0
+        else:
+            if(c == "L") or (c == "l"):
+                word += "l"
+                startCheck = True
+            elif (c == " "):
+                prevSpace = True
+                startCheck = False
+            else:
+                prevSpace = False
+                startCheck = False
+        
+    return (likeCount)
+
+
+def hmmCounter(transc):
+    hmmCount = 0
+    word = ""
+    prevSpace = True
+    startCheck = False
+    count = 0
+
+    for c in transc: 
+        if (startCheck):
+            if (count < 2):
+                word += c
+                count += 1
+            else: 
+                if (word.lower() == "hmm"):
+                    hmmCount += 1
+                word = ""
+                prevSpace = False
+                startCheck = False
+                count = 0
+        else:
+            if(c == "h") or (c == "H"):
+                word += "h"
+                startCheck = True
+            elif (c == " "):
+                prevSpace = True
+                startCheck = False
+            else:
+                prevSpace = False
+                startCheck = False
+        
+    return (hmmCount)
+
+
+def mhmCounter(transc):
+    mhmCount = 0
+    word = ""
+    prevSpace = True
+    startCheck = False
+    count = 0
+
+    for c in transc: 
+        if (startCheck):
+            if (count < 2):
+                word += c
+                count += 1
+            else: 
+                if (word.lower() == "mhm"):
+                    mhmCount += 1
+                word = ""
+                prevSpace = False
+                startCheck = False
+                count = 0
+        else:
+            if(c == "m") or (c == "M"):
+                word += "m"
+                startCheck = True
+            elif (c == " "):
+                prevSpace = True
+                startCheck = False
+            else:
+                prevSpace = False
+                startCheck = False
+        
+    return (mhmCount)
+
+
+
+
+def buttonUpdate(data1,data2,data3,data4,data5):
     global orig1, delta1
-    delta1 = newData - orig1 
-    orig1 = newData
-    
+    delta1 = data1 - orig1 
+    orig1 = data1
+
+    global orig2, delta2
+    delta2 = data2 - orig2 
+    orig2 = data2
+
+    global orig3, delta3
+    delta3 = data3 - orig3 
+    orig3 = data3
+
+    global orig4, delta4
+    delta4 = data4 - orig4 
+    orig4 = data4
+
+    global orig5, delta5
+    delta5 = data5 - orig5 
+    orig5 = data5
+
+
+
     #Metrics
     #***
     col1,col2,col3,col4,col5 = st.columns(5)
     with col1:
         st.metric(label="Um's", value=orig1, delta=delta1)
     with col2:
-        st.metric(label="Uh's", value="90", delta="0")
+        st.metric(label="Uh's", value=orig2, delta=delta2)
     with col3:
-        st.metric(label="Hmm's", value="127", delta="-12")
+        st.metric(label="Like's", value=orig3, delta=delta3)
     with col4:
-        st.metric(label="Mhm's", value="69", delta="50")
+        st.metric(label="Hmm's", value=orig4, delta=delta4)
     with col5:
-        st.metric(label="Like's", value="20", delta="-31")
+        st.metric(label="Mhm's", value=orig5, delta=delta5)
+
 
     #Chart
     #***
-    df = pd.DataFrame(np.random.rand(30, 5),columns=('col %d' % i for i in range(5)))
+    # print (np.random.rand(30, 5))
+    finalTextNum = 0
+    filepath = 'transcribe.srt.txt'
+    with open(filepath) as fp:
+        line = fp.readline()
+        count = 0
+        while line:
+            if (count%4 == 0):
+                finalTextNum = line
+            # print("Line {}: {}".format(count, line.strip()))
+            line = fp.readline()
+            count += 1
+    # print("\nFinal text num")
+    # print(finalTextNum)
+
+    # to get the number of lines per section divide the finalTextnum by 30 (since 30 columns in the graph)
+    sectionNum = int((int(finalTextNum)/30)) * 4
+
+
+
+    everything = []
+
+    with open(filepath) as fp:
+        line = fp.readline()
+        count = 0
+        while line:
+            if (count%4 == 2):
+                finalTextNum = line
+                # print("Line {}: {}".format(count, line.strip()))
+                everything.append(line)
+                
+            line = fp.readline()
+            count += 1
+
+    sectionSize = int(len(everything)/30)
+
+    counter = 0
+    dictCount = 0
+    stringer = ""
+    Dict = {} 
+    for x in everything:
+        if (counter < sectionSize):
+            stringer += x
+        else:
+            # print (stringer)
+            Dict[dictCount] = stringer
+            stringer = ""
+            dictCount += 1
+            counter = 0
+        counter += 1
+
+
+    realDict = []
+    um = 0
+    uh = 0
+    like = 0
+    hmm = 0
+    mhm = 0
+    dicCount = 0
+
+    for x in range(0,len(Dict)):
+        realDict.append([umCounter(Dict[x]), uhCounter(Dict[x]), likeCounter(Dict[x]), hmmCounter(Dict[x]), mhmCounter(Dict[x])])
+
+    
+    df = pd.DataFrame(realDict,columns=['um', 'uh', 'like', 'hmm', 'mhm'])
     st.bar_chart(df)
     
     #***
@@ -311,4 +550,9 @@ if data_button:
         time.sleep(1)
     st.success('Done!')
     st.header("Speech Analytics")
-    buttonUpdate(420)
+
+    f = open("transcribe_txt.txt", "r")
+    transc = f.readline()
+
+    buttonUpdate(umCounter(transc),uhCounter(transc),likeCounter(transc),hmmCounter(transc),mhmCounter(transc))
+  
