@@ -58,6 +58,99 @@ def buttonUpdate(newData):
     st.bar_chart(df)
     
     #***
+
+def transcribe():
+
+    current_dir = os.getcwd()
+
+    for file in os.listdir(current_dir):
+        if file.endswith(".mp4"):
+            mp4_file = os.path.join(current_dir, file)
+            print(mp4_file)
+    filename = mp4_file
+    bar.progress(20)
+
+    def read_file(filename, chunk_size=5242880):
+        with open(filename, 'rb') as _file:
+            while True:
+                data = _file.read(chunk_size)
+                if not data:
+                    break
+                yield data
+    headers = {'authorization': api_key}
+    response = requests.post('https://api.assemblyai.com/v2/upload',
+                            headers=headers,
+                            data=read_file(filename))
+    audio_url = response.json()['upload_url']
+    #st.info('3. YouTube audio file has been uploaded to AssemblyAI')
+    bar.progress(30)
+
+    # 4. Transcribe uploaded audio file
+    endpoint = "https://api.assemblyai.com/v2/transcript"
+
+    json = {
+    "audio_url": audio_url,
+    "auto_highlights": True, #add
+    "disfluencies": True
+    }
+
+    headers = {
+        "authorization": api_key,
+        "content-type": "application/json"
+    }
+
+    transcript_input_response = requests.post(endpoint, json=json, headers=headers)
+
+    #st.info('4. Transcribing uploaded file')
+    bar.progress(40)
+
+    # 5. Extract transcript ID
+    transcript_id = transcript_input_response.json()["id"]
+    #st.info('5. Extract transcript ID')
+    bar.progress(50)
+
+    # 6. Retrieve transcription results
+    endpoint = f"https://api.assemblyai.com/v2/transcript/{transcript_id}"
+    headers = {
+        "authorization": api_key,
+    }
+    transcript_output_response = requests.get(endpoint, headers=headers)
+    #st.info('6. Retrieve transcription results')
+    bar.progress(60)
+
+    # Check if transcription is complete
+    from time import sleep
+
+    while transcript_output_response.json()['status'] != 'completed':
+        sleep(10)
+        st.warning('Transcription is processing ...')
+        transcript_output_response = requests.get(endpoint, headers=headers)
+    
+    bar.progress(100)
+
+    # 7. Print transcribed text
+    st.header('Output')
+    st.success(transcript_output_response.json()["text"])
+
+    # 8. Save transcribed text to file
+
+    # Save as TXT file
+    transcribe_txt = open('transcribe_txt', 'w')
+    transcribe_txt.write(transcript_output_response.json()["text"])
+    transcribe_txt.close()
+
+    # Save as SRT file
+    srt_endpoint = endpoint + "/srt"
+    srt_response = requests.get(srt_endpoint, headers=headers)
+    with open("transcribe.srt", "w") as _file:
+        _file.write(srt_response.text)
+    
+    # zip_file = ZipFile('transcription.zip', 'w')
+    # zip_file.write('transcribe.txt')
+    # zip_file.write('transcribe.srt')
+    # zip_file.close()
+###################################
+
 def live_audio():
     FRAMES_PER_BUFFER = 3200
     FORMAT = pyaudio.paInt16
@@ -141,19 +234,16 @@ st.write("????")
 
 live_button = st.button("Start recording live audio")
 data_button = st.button('Show me my data!')
-file_upload_button = st.button('Upload a file')
+uploaded_file = st.file_uploader('Choose File', type=["mp4"])
+if uploaded_file:
+    submit_button = st.button('Submit File')
+    if submit_button:
+        transcribe()
 
 if(int(datetime.utcnow().timestamp()) % 2 == 1):
     test_val = True
 else:
     test_val = False
-
-st.error("Humanity Lived")
-
-if file_upload_button:
-    uploaded_file = st.file_uploader('Choose File')
-    #if uploaded_file is not None:
-#        buttonUpdate(420)
 
 if live_button:
     live_audio()
